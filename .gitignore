@@ -1,0 +1,6 @@
+venv/
+.env
+.ipynb_checkpoints/
+scratch_git/
+__pycache__/
+*.parquet
