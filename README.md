@@ -17,9 +17,17 @@ This repository contains the core algorithmic engine, the Streamlit web applicat
 - **JSON Seed Files**: Act as the primary Knowledge Base (Layer 1) for career skills, aliases, and learning dependencies (e.g., `careers.json`, `prerequisites.json`).
 - **`requirements.txt`**: Contains the precise Python dependencies required to deploy the engine on Streamlit Cloud.
 
-## Data Sources
-*Note: The raw datasets and preprocessed `.parquet` files are **not** included in this repository to keep it lightweight. The engine dynamically accesses them locally if present.*
-- **Dataset Source**: [https://www.kaggle.com/datasets/emarkhauser/onet-29-0-database]
+## Data Processing Pipeline
+
+This project employs a robust data processing pipeline to convert massive raw datasets into lightning-fast, production-ready assets:
+
+1. **Raw Data Extraction**: The system initially ingests the massive O*NET 29.0 Database (containing hundreds of thousands of rows of career and skill data).
+   - **Source**: [Kaggle O*NET 29.0 Database](https://www.kaggle.com/datasets/emarkhauser/onet-29-0-database)
+2. **Data Cleaning & Preprocessing**: The raw datasets are heavily processed using `pandas` to remove noise, normalize career titles, and map complex skill relationships.
+3. **Parquet Conversion**: The processed data is then compressed into highly efficient `.parquet` files for rapid, localized querying.
+4. **JSON Distillation**: The most critical career relationships, aliases, and prerequisite graphs are further distilled into ultra-lightweight `.json` seed files (`careers.json`, `prerequisites.json`) which act as the primary Knowledge Base (Layer 1).
+
+*Note: The raw datasets and massive preprocessed `.parquet` files are **deliberately excluded** from this GitHub repository to keep the deployment incredibly lightweight and fast. The Streamlit engine seamlessly falls back to the distilled JSON seed files and the Groq LLM API to operate efficiently in production without needing the heavy local files.*
 
 ## How the System Works
 
