@@ -22,6 +22,10 @@ This repository contains the core algorithmic engine, the Streamlit web applicat
 - **Dataset Source**: [https://www.kaggle.com/datasets/emarkhauser/onet-29-0-database]
 
 ## How the System Works
+
+**The Core Architecture: JSON + Dataset + API**
+The system orchestrates a resilient fallback architecture combining local seed files (`JSON`), massive curated databases (`Datasets`), and Generative AI (`API`). When a user requests a career roadmap, the engine first attempts to map it against lightning-fast local JSON dictionaries. If more depth is needed, it can query extended datasets. Finally, if the career is entirely unknown or highly specialized, it securely calls the Groq API to dynamically generate the exact skills and video timestamps required on the fly, ensuring the system never fails to produce a highly personalized roadmap.
+
 The PathFinder engine uses a strictly layered architecture to ensure speed, accuracy, and logical progression:
 1. **Conversational AI Assistant**: Interfaces with the Groq API (Qwen model) to chat with the user, extract their intent (target career and existing skills) into structured JSON, and dynamically extract relevant video chapters for long crash courses.
 2. **Knowledge Base & Skill Gap Engine**: 
