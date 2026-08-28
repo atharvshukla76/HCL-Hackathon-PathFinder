@@ -12,7 +12,7 @@ class PathForgeKnowledgeBase:
         self.data_dir = data_dir
         self.json_dir = json_dir
         self.load_data()
-        
+    def load_data(self):
         try:
             self.occupation_skills = pd.read_parquet(f"{self.data_dir}/processed/occupation_skills.parquet")
             self.occupations = pd.read_parquet(f"{self.data_dir}/processed/occupations.parquet")
