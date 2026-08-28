@@ -64,12 +64,13 @@ The `requirements.txt` file tracks all the third-party libraries needed for the 
 - `python-dotenv`: For securely loading API keys from a local `.env` file into the environment.
 - `streamlit`: For building the interactive web UI and dashboards.
 
-### 4. Environment Variables
-To evaluate this project, you (the user/judge) will need to create a local `.env` file in the root directory and provide your own API key for the LLM features to function:
-```env
-GROQ_API_KEY=<INSERT_YOUR_GROQ_API_KEY>
-```
-*(⚠️ SECURITY WARNING: This is just an example format for the judges! Never write your actual API key in this README or upload your `.env` file to GitHub. The person reviewing the code must provide their own key to test it locally.)*
+### 4. API Integration (Groq LLM)
+This project utilizes the **Groq API** to power the Generative AI features of the application. The API is securely integrated into the Streamlit deployment to handle:
+- Natural language intent extraction from user chat inputs.
+- Dynamic generation of career paths for unknown/new careers (LLM Fallback).
+- Automated extraction of relevant video timestamps from massive YouTube crash courses.
+
+*(Note: The API key is securely managed within Streamlit Community Cloud Secrets and is not exposed in this repository).*
 
 ## Usage
 1. Ensure your virtual environment is activated.
