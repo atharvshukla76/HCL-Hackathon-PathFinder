@@ -1,0 +1,82 @@
+{
+    "Machine Learning Engineer": {
+        "onet_codes": [
+            "15-1251.00"
+        ],
+        "aliases": [
+            "ML Engineer",
+            "Machine Learning Developer",
+            "machine learning engineer"
+        ],
+        "Python": 0.95,
+        "Mathematics": 0.9,
+        "Statistics": 0.85,
+        "Machine Learning": 0.95,
+        "Deep Learning": 0.8,
+        "Data Analysis": 0.8,
+        "Model Deployment": 0.75,
+        "SQL": 0.65
+    },
+    "Data Scientist": {
+        "onet_codes": [
+            "15-2051.01"
+        ],
+        "aliases": [
+            "Data Science Engineer",
+            "Applied Scientist"
+        ],
+        "Python": 0.9,
+        "Statistics": 0.95,
+        "Mathematics": 0.85,
+        "Machine Learning": 0.85,
+        "Data Analysis": 0.95,
+        "SQL": 0.8,
+        "Data Visualization": 0.75
+    },
+    "Data Analyst": {
+        "onet_codes": [
+            "15-2051.01"
+        ],
+        "aliases": [
+            "Business Data Analyst",
+            "Data Analytics Specialist"
+        ],
+        "SQL": 0.95,
+        "Excel": 0.85,
+        "Data Visualization": 0.85,
+        "Statistics": 0.75,
+        "Python": 0.65,
+        "Data Analysis": 0.9
+    },
+    "Frontend Developer": {
+        "onet_codes": [
+            "15-1254.00"
+        ],
+        "aliases": [
+            "Web Developer",
+            "UI Developer",
+            "Front End Developer"
+        ],
+        "HTML": 0.95,
+        "CSS": 0.9,
+        "JavaScript": 0.95,
+        "React": 0.85,
+        "TypeScript": 0.75,
+        "UI/UX Design": 0.65
+    },
+    "AI Researcher": {
+        "onet_codes": [
+            "15-1221.00"
+        ],
+        "aliases": [
+            "Research Scientist",
+            "ML Researcher"
+        ],
+        "Mathematics": 0.98,
+        "Statistics": 0.95,
+        "Deep Learning": 0.95,
+        "Python": 0.9,
+        "Machine Learning": 0.9,
+        "Research Methods": 0.85
+    }
+}

@@ -1,0 +1,10 @@
+venv/
+.env
+.ipynb_checkpoints/
+scratch_git/
+__pycache__/
+*.parquet
+debug_log.txt
+temp.py
+archive/
+*cache*.json

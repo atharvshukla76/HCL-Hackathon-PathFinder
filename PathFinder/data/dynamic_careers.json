@@ -1,0 +1,23 @@
+{
+    "Astrophysicist": {
+        "Mathematics": 0.95,
+        "Science": 0.95,
+        "Complex Problem Solving": 0.9,
+        "Programming": 0.85,
+        "Critical Thinking": 0.8
+    },
+    "AI/ML engineer": {
+        "Python Programming & Data Manipulation": 0.95,
+        "Deep Learning Frameworks (PyTorch/TensorFlow)": 0.92,
+        "MLOps & Model Deployment": 0.88,
+        "Statistical Learning & Mathematical Foundations": 0.85,
+        "Data Engineering & Pipeline Development": 0.8
+    },
+    "data scientist": {
+        "Python Programming & Data Manipulation": 0.95,
+        "Machine Learning & Statistical Modeling": 0.92,
+        "SQL & Database Querying": 0.88,
+        "Data Visualization & Business Communication": 0.85,
+        "MLOps & Production Deployment": 0.82
+    }
+}

@@ -1,0 +1,45 @@
+{
+    "Machine Learning": [
+        "Python",
+        "Statistics"
+    ],
+    "Deep Learning": [
+        "Machine Learning",
+        "Python"
+    ],
+    "PyTorch": [
+        "Deep Learning",
+        "Python"
+    ],
+    "MLOps": [
+        "Docker",
+        "Machine Learning"
+    ],
+    "Data Visualization": [
+        "Statistics"
+    ],
+    "Tableau": [
+        "Data Visualization",
+        "SQL"
+    ],
+    "JavaScript": [
+        "HTML/CSS"
+    ],
+    "React": [
+        "JavaScript",
+        "HTML/CSS"
+    ],
+    "TypeScript": [
+        "JavaScript"
+    ],
+    "Web Performance": [
+        "JavaScript",
+        "HTML/CSS"
+    ],
+    "Python": [],
+    "Statistics": [],
+    "SQL": [],
+    "Docker": [],
+    "Excel": [],
+    "HTML/CSS": []
+}
