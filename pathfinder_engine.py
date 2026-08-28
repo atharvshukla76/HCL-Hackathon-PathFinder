@@ -13,11 +13,17 @@ class PathForgeKnowledgeBase:
         self.json_dir = json_dir
         self.load_data()
         
-    def load_data(self):
-        self.occupation_skills = pd.read_parquet(f"{self.data_dir}/processed/occupation_skills.parquet")
-        self.occupations = pd.read_parquet(f"{self.data_dir}/processed/occupations.parquet")
-        self.alt_titles = pd.read_parquet(f"{self.data_dir}/processed/alternate_titles.parquet")
-        self.tech_skills = pd.read_parquet(f"{self.data_dir}/processed/technology_skills.parquet")
+        try:
+            self.occupation_skills = pd.read_parquet(f"{self.data_dir}/processed/occupation_skills.parquet")
+            self.occupations = pd.read_parquet(f"{self.data_dir}/processed/occupations.parquet")
+            self.alt_titles = pd.read_parquet(f"{self.data_dir}/processed/alternate_titles.parquet")
+            self.tech_skills = pd.read_parquet(f"{self.data_dir}/processed/technology_skills.parquet")
+        except (FileNotFoundError, Exception) as e:
+            print(f"[Init] ⚠️ Parquet datasets not found in {self.data_dir}. Running purely on curated JSON/LLM fallbacks.")
+            self.occupation_skills = pd.DataFrame()
+            self.occupations = pd.DataFrame()
+            self.alt_titles = pd.DataFrame()
+            self.tech_skills = pd.DataFrame()
         
         with open(f"{self.json_dir}/careers.json", 'r') as f:
             self.seed_careers = json.load(f)
