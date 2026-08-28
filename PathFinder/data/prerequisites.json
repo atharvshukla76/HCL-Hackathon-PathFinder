@@ -1,7 +1,9 @@
 {
     "Machine Learning": [
         "Python",
-        "Statistics"
+        "Statistics",
+        "Mathematics",
+        "Data Analysis"
     ],
     "Deep Learning": [
         "Machine Learning",
@@ -41,5 +43,11 @@
     "SQL": [],
     "Docker": [],
     "Excel": [],
-    "HTML/CSS": []
+    "HTML/CSS": [],
+    "Mathematics": [],
+    "Data Analysis": [
+        "SQL",
+        "Python",
+        "Statistics"
+    ]
 }
