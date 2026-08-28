@@ -29,6 +29,18 @@ This project employs a robust data processing pipeline to convert massive raw da
 
 *Note: The raw datasets and massive preprocessed `.parquet` files are **deliberately excluded** from this GitHub repository to keep the deployment incredibly lightweight and fast. The Streamlit engine seamlessly falls back to the distilled JSON seed files and the Groq LLM API to operate efficiently in production without needing the heavy local files.*
 
+## Core Engine Notebooks
+
+The foundational logic, data engineering, and AI architecture for this project were initially developed and tested inside Jupyter Notebooks. These notebooks serve as the "brain" behind the application and can be found in the `notebooks/` directory of this repository.
+
+1. **`notebooks/cleaning+preprocessing.ipynb`**:
+   - **Purpose**: Handles the entire data engineering lifecycle.
+   - **Details**: This notebook ingests the raw Kaggle O*NET dataset and performs extensive data cleaning using `pandas`. It normalizes career titles, maps skill proficiencies, removes noisy columns, and converts the heavy raw data into optimized `.parquet` and `.json` seed files used by the production app.
+
+2. **`notebooks/pathfinder_ai.ipynb`**:
+   - **Purpose**: The core logic engine and AI prototyping environment.
+   - **Details**: This notebook contains the original implementation of the `PathFinderEngine`. It is where the mathematical skill gap calculation, `networkx` prerequisite graph sorting, and Groq LLM API integrations were meticulously built and tested before being ported into the Streamlit web architecture for deployment.
+
 ## How the System Works
 
 **The Core Architecture: JSON + Dataset + API**
