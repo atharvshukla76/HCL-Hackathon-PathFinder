@@ -7,4 +7,3 @@ __pycache__/
 debug_log.txt
 temp.py
 archive/
-*cache*.json
