@@ -4,3 +4,8 @@ venv/
 scratch_git/
 __pycache__/
 *.parquet
+debug_log.txt
+temp.py
+archive/
+PathFinder/
+*cache*.json
