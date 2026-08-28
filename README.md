@@ -1,16 +1,21 @@
 # PathFinder: AI-Powered Career Roadmap Generator
 
-PathFinder is an intelligent, interactive engine designed to generate highly personalized, step-by-step learning roadmaps for users transitioning into technology careers (such as Machine Learning Engineering, Data Science, etc.). 
+**🚀 [Live Demo: PathFinder AI on Streamlit](https://hcl-hackathon-pathfinder-gykvnhfffnsvkhnaynycfr.streamlit.app/)**
 
-By combining structured knowledge bases (like O*NET career profiles and curated seed data) with the reasoning capabilities of Open-Domain Large Language Models (via Groq), PathFinder accurately assesses an individual's skill gaps and generates a dynamic learning path containing recommended resources and dynamically extracted video timestamps.
+### What PathFinder AI is
+PathFinder AI is a Generative AI career roadmap generator. 
+
+### The Problem it Solves
+It helps students and professionals figure out exactly what skills they need to learn for their target careers without getting overwhelmed. By automatically calculating skill gaps and dependencies, it provides a perfectly structured, chronological learning path.
+
+### How it was Built
+This project was built using **Streamlit** (for the interactive frontend), **Python** (for the core backend engine), **Groq LLM** (for ultra-fast AI reasoning and dynamic video chapter extraction), and **NetworkX** (for mathematical graph sorting of learning prerequisites).
 
 ## Repository Contents
-**GitHub Repository**: [https://github.com/atharvshukla76/HCL-Hackathon-PathFinder](https://github.com/atharvshukla76/HCL-Hackathon-PathFinder)
-
-This repository focuses on the core algorithmic engine, data processing, and AI integration, accessed via interactive Jupyter Notebooks.
-- **Jupyter Notebooks**: Contain the interactive chat interface and the complete execution pipeline for the PathFinder engine.
+This repository contains the core algorithmic engine, the Streamlit web application, and the AI integration layer.
+- **Streamlit App (`app.py` & `ui/`)**: Contains the interactive chat interface and the visual dashboards for the PathFinder engine.
 - **JSON Seed Files**: Act as the primary Knowledge Base (Layer 1) for career skills, aliases, and learning dependencies (e.g., `careers.json`, `prerequisites.json`).
-- **`requirements.txt`**: Contains the precise Python dependencies required to execute the engine.
+- **`requirements.txt`**: Contains the precise Python dependencies required to deploy the engine on Streamlit Cloud.
 
 ## Data Sources
 *Note: The raw datasets and preprocessed `.parquet` files are **not** included in this repository to keep it lightweight. The engine dynamically accesses them locally if present.*
@@ -57,7 +62,7 @@ The `requirements.txt` file tracks all the third-party libraries needed for the 
 - `networkx`: For building and traversing the Directed Acyclic Graphs (DAGs) used to calculate complex skill prerequisites.
 - `groq`: The official Python client for interacting with the Groq API (powering the ultra-fast Qwen LLM inferences).
 - `python-dotenv`: For securely loading API keys from a local `.env` file into the environment.
-- `jupyter`: To launch and run the interactive notebook environment.
+- `streamlit`: For building the interactive web UI and dashboards.
 
 ### 4. Environment Variables
 To evaluate this project, you (the user/judge) will need to create a local `.env` file in the root directory and provide your own API key for the LLM features to function:
@@ -68,9 +73,9 @@ GROQ_API_KEY=<INSERT_YOUR_GROQ_API_KEY>
 
 ## Usage
 1. Ensure your virtual environment is activated.
-2. Launch Jupyter Notebook from your terminal:
+2. Launch the Streamlit web application from your terminal:
    ```bash
-   jupyter notebook
+   streamlit run app.py
    ```
-3. Open the interactive notebooks from the browser interface.
-4. Run the cells sequentially to initialize the engine, chat with the AI, and generate your personalized learning roadmap!
+3. Open the provided localhost URL in your browser.
+4. Chat with the AI to generate your personalized learning roadmap!
