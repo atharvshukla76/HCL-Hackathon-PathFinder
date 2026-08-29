@@ -425,7 +425,7 @@ class ConversationalAIAssistant:
     def generate_assessment(self, skill):
         try:
             prompt = f"Generate 5 distinct, moderately difficult assessment questions to thoroughly test conceptual knowledge of '{skill}'. Include a mix of multiple-choice (with options A, B, C, D) and open-ended short-answer questions. Separate each of the 5 questions strictly using the exact string '|||'. IMPORTANT: Do NOT output any <think> tags, thought process, or reasoning. Output ONLY the questions. Example: Question 1 text... A) B) C) D) ||| Question 2 short-answer text... ||| Question 3..."
-            response = self.client.chat.completions.create(model="qwen/qwen3.6-27b", messages=[{"role": "user", "content": prompt}], temperature=0.5, timeout=15.0)
+            response = self.client.chat.completions.create(model="qwen/qwen3.6-27b", messages=[{"role": "user", "content": prompt}], temperature=0.5, timeout=45.0)
             raw_text = response.choices[0].message.content
             
             # If the model output a thinking block but got cut off, trigger fallback
@@ -438,8 +438,8 @@ class ConversationalAIAssistant:
         
     def grade_assessment(self, question, user_answer):
         try:
-            prompt = f"Question: {question}\nUser Answer: {user_answer}\nGrade this answer. Return ONLY a JSON object: {{\"score\": 100}} if correct, {{\"score\": 0}} if totally wrong, or in between for partial credit."
-            response = self.client.chat.completions.create(model="qwen/qwen3.6-27b", messages=[{"role": "user", "content": prompt}], temperature=0.1, timeout=10.0)
+            prompt = f"Question:\n{question}\nUser Answer: {user_answer}\nGrade this answer. Give 20 points for a fully correct answer, 0 for totally wrong, or in between for partial credit. Return ONLY a JSON object: {{\"score\": 100}} if correct, {{\"score\": 0}} if totally wrong, or the exact total score."
+            response = self.client.chat.completions.create(model="qwen/qwen3.6-27b", messages=[{"role": "user", "content": prompt}], temperature=0.2, timeout=45.0)
             raw_text = re.sub(r'<think>.*?</think>', '', response.choices[0].message.content, flags=re.DOTALL)
             return json.loads(re.search(r'\{.*\}', raw_text, re.DOTALL).group(0)).get("score", 0)
         except: return 0
