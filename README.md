@@ -50,14 +50,18 @@ The foundational logic, data engineering, and AI architecture for this project w
 
 ## How the System Works
 
-**The Core Architecture: JSON + Dataset + API**
-The system orchestrates a resilient fallback architecture combining local seed files (`JSON`), massive curated databases (`Datasets`), and Generative AI (`API`). When a user requests a career roadmap, the engine first attempts to map it against lightning-fast local JSON dictionaries. If more depth is needed, it can query extended datasets. Finally, if the career is entirely unknown or highly specialized, it securely calls the Groq API to dynamically generate the exact skills and video timestamps required on the fly, ensuring the system never fails to produce a highly personalized roadmap.
+  **The Core Architecture: Independent Tri-Layer System**
+  The system orchestrates a resilient fallback architecture combining three distinct and separate pillars:
+  1. **Hand-Curated Seed Files (`JSON/CSV`)**: Custom-generated baseline data (`careers.json`, `skills.json`, `resources.csv`, `dynamic_careers.json`, `dynamic_skills.json`, `prerequisites.json`).
+  2. **Massive Curated Databases (`Datasets`)**: Deep background datasets (e.g., O*NET) for extensive querying.
+  3. **Generative AI (`API`)**: Groq LLM API for dynamic reasoning and fallback.
+  
+  When a user requests a career roadmap, the engine first attempts to map it against the lightning-fast, custom curated JSON dictionaries. If more depth is needed, it queries extended datasets. Finally, if the career is entirely unknown or highly specialized, it securely calls the Groq API to dynamically generate the exact skills and video timestamps required on the fly, ensuring the system never fails to produce a highly personalized roadmap.
 
 The PathFinder engine uses a strictly layered architecture to ensure speed, accuracy, and logical progression:
 1. **Conversational AI Assistant**: Interfaces with the Groq API (Qwen model) to chat with the user, extract their intent (target career and existing skills) into structured JSON, and dynamically extract relevant video chapters for long crash courses.
 2. **Knowledge Base & Skill Gap Engine**: 
    - Leverages a prioritized fallback system to resolve career requirements. It first checks the local JSON seed files using exact, alias, and partial matching.
-   - Once the career is resolved, it mathematically calculates the "gap" between the user's current proficiency and the career's required proficiency.
 3. **Skill Dependency Graph**: Uses graph theory (`networkx`) to map out the prerequisite order of missing skills (e.g., ensuring Mathematics is learned before Machine Learning), guaranteeing a logical roadmap.
 4. **Recommendation & Adaptive Progress Engine**: Matches the identified missing skills with curated learning resources, scores them based on quality and difficulty, and compiles a final, actionable milestone-driven roadmap.
 
