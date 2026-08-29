@@ -92,15 +92,25 @@ if st.session_state.assessment_state and st.session_state.assessment_state.get("
                 st.session_state.messages.append({"role": "user", "content": answer})
                 
                 # Grade it
-                score = st.session_state.adapter.grade_answer(question, answer)
+                result = st.session_state.adapter.grade_answer(question, answer)
+                if isinstance(result, int):
+                    score = result
+                    feedback_text = ""
+                else:
+                    score = result.get("score", 0)
+                    feedback_text = result.get("feedback", "")
+                    
                 points = 20 if score >= 80 else 0
                 st.session_state.assessment_state["score_total"] += points
                 st.session_state.assessment_state["current_q_index"] += 1
                 
                 # Check if there are more questions for THIS skill
                 if st.session_state.assessment_state["current_q_index"] < len(st.session_state.assessment_state["questions"]):
-                    feedback = "✅ Correct!" if points > 0 else "❌ Incorrect."
-                    st.session_state.messages.append({"role": "assistant", "content": feedback})
+                    if points > 0:
+                        feedback_msg = f"✅ Correct! {feedback_text}" if feedback_text else "✅ Correct!"
+                    else:
+                        feedback_msg = f"❌ Incorrect (Score: {score}/100). {feedback_text}" if feedback_text else "❌ Incorrect."
+                    st.session_state.messages.append({"role": "assistant", "content": feedback_msg})
                 else:
                     # Finished all 5 questions for this skill
                     final_score = st.session_state.assessment_state["score_total"]

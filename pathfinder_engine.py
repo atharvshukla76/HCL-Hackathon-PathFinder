@@ -438,11 +438,12 @@ class ConversationalAIAssistant:
         
     def grade_assessment(self, question, user_answer):
         try:
-            prompt = f"Question:\n{question}\nUser Answer: {user_answer}\nGrade this answer out of 100. Give 100 for a fully correct answer, 0 for totally wrong, or in between for partial credit. Return ONLY a valid JSON object: {{\"score\": 100}}."
+            prompt = f"Question:\n{question}\nUser Answer: {user_answer}\nGrade this answer out of 100. Return a JSON object with 'score' (0-100) and 'feedback' (1 short sentence explaining why they lost points, or praise if perfect). Example: {{\"score\": 100, \"feedback\": \"Perfect!\"}}"
             response = self.client.chat.completions.create(model="qwen/qwen3.6-27b", messages=[{"role": "user", "content": prompt}], temperature=0.2, timeout=45.0)
             raw_text = re.sub(r'<think>.*?</think>', '', response.choices[0].message.content, flags=re.DOTALL)
-            return json.loads(re.search(r'\{.*\}', raw_text, re.DOTALL).group(0)).get("score", 0)
-        except: return 0
+            parsed = json.loads(re.search(r'\{.*\}', raw_text, re.DOTALL).group(0))
+            return parsed
+        except: return {"score": 0, "feedback": "Could not parse grade."}
             
     def generate_reply(self, user_input, current_profile, new_roadmap):
         try:
