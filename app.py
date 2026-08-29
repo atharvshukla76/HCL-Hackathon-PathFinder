@@ -149,8 +149,9 @@ if st.session_state.assessment_state and st.session_state.assessment_state.get("
                 st.session_state.processing = False
                 st.rerun()
 
-# User input area
-user_input = st.chat_input("Type your message here...", disabled=st.session_state.processing or (st.session_state.assessment_state is not None))
+# Chat Input
+is_assessing = st.session_state.assessment_state is not None
+user_input = st.chat_input("Type your message here...", disabled=st.session_state.processing or is_assessing)
 
 if user_input:
     # 1. Show user message immediately
