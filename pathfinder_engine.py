@@ -3,6 +3,7 @@ import pandas as pd
 import networkx as nx
 import re
 import os
+import threading
 from groq import Groq
 import warnings
 warnings.filterwarnings('ignore')
@@ -311,6 +312,8 @@ def resolve_career_requirements(career_name, engine, llm_callback):
     return None
 
 class ConversationalAIAssistant:
+    _cache_lock = threading.Lock()
+
     def __init__(self, api_key):
         try:
             self.client = Groq(api_key=api_key)
@@ -410,8 +413,9 @@ class ConversationalAIAssistant:
             response = self.client.chat.completions.create(model="qwen/qwen3.6-27b", messages=[{"role": "user", "content": prompt}], temperature=0.5, timeout=5.0)
             result = re.sub(r'<think>.*?</think>', '', response.choices[0].message.content, flags=re.DOTALL).strip()
             
-            cache[cache_key] = result
-            with open(cache_file, 'w') as f: json.dump(cache, f, indent=4)
+            with self._cache_lock:
+                cache[cache_key] = result
+                with open(cache_file, 'w') as f: json.dump(cache, f, indent=4)
             return result
         except: return "Check video timeline."
             

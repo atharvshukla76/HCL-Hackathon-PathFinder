@@ -34,6 +34,8 @@ if "processing" not in st.session_state:
     st.session_state.processing = False
 if "assessment_state" not in st.session_state:
     st.session_state.assessment_state = None
+if "assessment_queue" not in st.session_state:
+    st.session_state.assessment_queue = []
 
 def restart_journey():
     st.session_state.messages = [
@@ -44,6 +46,7 @@ def restart_journey():
     st.session_state.roadmap = []
     st.session_state.processing = False
     st.session_state.assessment_state = None
+    st.session_state.assessment_queue = []
 
 # Sidebar
 render_progress_sidebar(st.session_state.learner_profile, st.session_state.roadmap)
@@ -108,8 +111,21 @@ if st.session_state.assessment_state and st.session_state.assessment_state.get("
                     
                 st.session_state.messages.append(response_msg)
                 
-                # Clear assessment state
-                st.session_state.assessment_state = None
+                # Check if there are more skills in the queue to assess
+                if st.session_state.assessment_queue:
+                    next_skill = st.session_state.assessment_queue.pop(0)
+                    next_q = st.session_state.adapter.run_assessment(next_skill)
+                    
+                    st.session_state.assessment_state = {
+                        "skill": next_skill,
+                        "question": next_q,
+                        "phase": "asking"
+                    }
+                    st.session_state.messages.append({"role": "assistant", "content": f"Great! Next, let's check your readiness for {next_skill}."})
+                else:
+                    # Clear assessment state
+                    st.session_state.assessment_state = None
+                    
                 st.session_state.processing = False
                 st.rerun()
 
@@ -161,19 +177,27 @@ if st.session_state.processing and not (st.session_state.assessment_state and st
         if new_roadmap:
             st.session_state.roadmap = new_roadmap
 
-        # Check for assessment trigger
-        if parsed_data and parsed_data.get("completed_skill"):
-            completed_skill = parsed_data["completed_skill"]
+        # Check for assessment triggers
+        if parsed_data:
+            if parsed_data.get("completed_skill"):
+                st.session_state.assessment_queue.append(parsed_data["completed_skill"])
+            if parsed_data.get("known_skills"):
+                for skill in parsed_data["known_skills"].keys():
+                    if skill not in st.session_state.assessment_queue:
+                        st.session_state.assessment_queue.append(skill)
+                        
+        if st.session_state.assessment_queue:
+            next_skill = st.session_state.assessment_queue.pop(0)
             
             # Generate assessment
-            question = st.session_state.adapter.run_assessment(completed_skill)
+            question = st.session_state.adapter.run_assessment(next_skill)
             
             if st.session_state.processing: # Still not cancelled
-                intro_msg = f"Great! You finished {completed_skill}. Before we move forward, let's quickly check your readiness."
+                intro_msg = f"Before we finalize your roadmap, let's quickly check your readiness for {next_skill}."
                 st.session_state.messages.append({"role": "assistant", "content": intro_msg})
                 
                 st.session_state.assessment_state = {
-                    "skill": completed_skill,
+                    "skill": next_skill,
                     "question": question,
                     "phase": "asking"
                 }

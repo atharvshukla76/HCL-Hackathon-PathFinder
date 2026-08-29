@@ -48,7 +48,9 @@ class PathFinderAdapter:
                     try:
                         return original_create(*args, **kwargs)
                     except Exception as primary_error:
-                        print(f"Primary model {kwargs.get('model')} failed: {primary_error}. Falling back.")
+                        print(f"Primary model {kwargs.get('model')} failed: {primary_error}. Retrying with fallback.")
+                        import time
+                        time.sleep(2.0) # Small backoff to bypass instant rate-limits
                         kwargs["model"] = "qwen/qwen3.8-27b"
                         return original_create(*args, **kwargs)
                 client_instance.chat.completions.create = patched_create
