@@ -440,7 +440,10 @@ class ConversationalAIAssistant:
         try:
             prompt = f"Question:\n{question}\nUser Answer: {user_answer}\nGrade this answer out of 100. Return a JSON object with 'score' (0-100) and 'feedback' (1 short sentence explaining why they lost points, or praise if perfect). Example: {{\"score\": 100, \"feedback\": \"Perfect!\"}}"
             response = self.client.chat.completions.create(model="qwen/qwen3.6-27b", messages=[{"role": "user", "content": prompt}], temperature=0.2, timeout=45.0)
-            raw_text = re.sub(r'<think>.*?</think>', '', response.choices[0].message.content, flags=re.DOTALL)
+            raw_text = response.choices[0].message.content
+            if '<think>' in raw_text and '</think>' not in raw_text:
+                raise Exception("Cut off during thinking")
+            raw_text = re.sub(r'<think>.*?</think>', '', raw_text, flags=re.DOTALL | re.IGNORECASE)
             parsed = json.loads(re.search(r'\{.*\}', raw_text, re.DOTALL).group(0))
             return parsed
         except: return {"score": 0, "feedback": "Could not parse grade."}
