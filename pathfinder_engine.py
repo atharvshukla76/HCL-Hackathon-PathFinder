@@ -421,16 +421,11 @@ class ConversationalAIAssistant:
             
     def generate_assessment(self, skill):
         try:
-            prompt = f"Generate 5 distinct, moderately difficult assessment questions to thoroughly test conceptual knowledge of '{skill}'. Include a mix of multiple-choice (with options A, B, C, D) and open-ended short-answer questions. Return ONLY a valid JSON array of 5 strings. Each string must contain the question text (and options only if it is multiple-choice). Example: [\"Q1 text... A) B) C) D)\", \"Q2 short-answer text...\"]"
+            prompt = f"Generate 5 distinct, moderately difficult assessment questions to thoroughly test conceptual knowledge of '{skill}'. Include a mix of multiple-choice (with options A, B, C, D) and open-ended short-answer questions. Separate each of the 5 questions strictly using the exact string '|||'. Do NOT use JSON. Example: Question 1 text... A) B) C) D) ||| Question 2 short-answer text... ||| Question 3..."
             response = self.client.chat.completions.create(model="qwen/qwen3.6-27b", messages=[{"role": "user", "content": prompt}], temperature=0.5, timeout=15.0)
             raw_text = re.sub(r'<think>.*?</think>', '', response.choices[0].message.content, flags=re.DOTALL).strip()
-            
-            # Extract JSON array
-            json_match = re.search(r'\[.*\]', raw_text, re.DOTALL)
-            if json_match:
-                return json_match.group(0).strip()
             return raw_text
-        except: return f"[\"Question 1 for {skill}: What is the primary function? A, B, C, D.\", \"Question 2...\", \"Question 3...\", \"Question 4...\", \"Question 5...\"]"
+        except: return f"What is a core concept of {skill}? ||| Explain how {skill} is used in practice. ||| What is a common pitfall when using {skill}? ||| Describe an advanced feature of {skill}. ||| How does {skill} integrate with other tools?"
         
     def grade_assessment(self, question, user_answer):
         try:

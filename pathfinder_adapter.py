@@ -126,14 +126,19 @@ class PathFinderAdapter:
         """Generates 5 sequential assessments for a skill."""
         with contextlib.redirect_stdout(io.StringIO()):
             try:
-                questions_json = self.llm_assistant.generate_assessment(skill)
-                import json
-                questions = json.loads(questions_json)
-                if isinstance(questions, list) and len(questions) == 5:
+                questions_str = self.llm_assistant.generate_assessment(skill)
+                questions = [q.strip() for q in questions_str.split("|||") if q.strip()]
+                
+                if len(questions) >= 5:
+                    return questions[:5]
+                elif len(questions) > 0:
+                    while len(questions) < 5:
+                        questions.append(f"Additional question for {skill}: Can you explain another core concept?")
                     return questions
-            except Exception:
+            except Exception as e:
+                print(f"Error parsing questions: {e}")
                 pass
-            return [f"Question {i+1} for {skill}: What is the primary function? A, B, C, D." for i in range(5)]
+            return [f"What is a core concept of {skill}?", f"Explain how {skill} is used in practice.", f"What is a common pitfall when using {skill}?", f"Describe an advanced feature of {skill}.", f"How does {skill} integrate with other tools?"]
 
     def grade_answer(self, question, answer):
         """Grades an answer and returns the score (0-100)."""
