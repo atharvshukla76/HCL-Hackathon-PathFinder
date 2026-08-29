@@ -82,7 +82,7 @@ if st.session_state.assessment_state and st.session_state.assessment_state.get("
         input_label = "Select an option (A, B, C, or D)" if is_mcq else "Type your answer"
         
         with st.form(key="assessment_form"):
-            answer = st.text_input(input_label)
+            answer = st.text_input(input_label, key=f"ans_input_{skill}_{q_index}")
             submit = st.form_submit_button("Submit")
             
             if submit:
