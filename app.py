@@ -70,10 +70,11 @@ with chat_container:
 # Handle Assessment state logic
 if st.session_state.assessment_state and st.session_state.assessment_state.get("phase") == "asking":
     skill = st.session_state.assessment_state["skill"]
-    question = st.session_state.assessment_state["question"]
+    q_index = st.session_state.assessment_state["current_q_index"]
+    question = st.session_state.assessment_state["questions"][q_index]
     
     with st.chat_message("assistant"):
-        st.markdown(f"**Readiness Check: {skill}**")
+        st.markdown(f"**Readiness Check: {skill} (Question {q_index+1}/5)**")
         st.markdown(question)
         
         with st.form(key="assessment_form"):
@@ -88,44 +89,63 @@ if st.session_state.assessment_state and st.session_state.assessment_state.get("
                 
                 # Grade it
                 score = st.session_state.adapter.grade_answer(question, answer)
+                points = 20 if score >= 80 else 0
+                st.session_state.assessment_state["score_total"] += points
+                st.session_state.assessment_state["current_q_index"] += 1
                 
-                # Record it and regenerate roadmap
-                new_roadmap = st.session_state.adapter.record_assessment(
-                    st.session_state.learner_profile,
-                    st.session_state.career_data,
-                    skill,
-                    score
-                )
-                if new_roadmap:
-                    st.session_state.roadmap = new_roadmap
-                
-                # Update UI
-                response_msg = {
-                    "role": "assistant", 
-                    "content": f"Thanks for completing the assessment for {skill}.",
-                    "assessment_result": {"skill": skill, "score": score}
-                }
-                
-                if new_roadmap:
-                    response_msg["roadmap"] = new_roadmap
-                    
-                st.session_state.messages.append(response_msg)
-                
-                # Check if there are more skills in the queue to assess
-                if st.session_state.assessment_queue:
-                    next_skill = st.session_state.assessment_queue.pop(0)
-                    next_q = st.session_state.adapter.run_assessment(next_skill)
-                    
-                    st.session_state.assessment_state = {
-                        "skill": next_skill,
-                        "question": next_q,
-                        "phase": "asking"
-                    }
-                    st.session_state.messages.append({"role": "assistant", "content": f"Great! Next, let's check your readiness for {next_skill}."})
+                # Check if there are more questions for THIS skill
+                if st.session_state.assessment_state["current_q_index"] < len(st.session_state.assessment_state["questions"]):
+                    feedback = "✅ Correct!" if points > 0 else "❌ Incorrect."
+                    st.session_state.messages.append({"role": "assistant", "content": feedback})
                 else:
-                    # Clear assessment state
-                    st.session_state.assessment_state = None
+                    # Finished all 5 questions for this skill
+                    final_score = st.session_state.assessment_state["score_total"]
                     
+                    # Record it and regenerate roadmap
+                    new_roadmap = st.session_state.adapter.record_assessment(
+                        st.session_state.learner_profile,
+                        st.session_state.career_data,
+                        skill,
+                        final_score
+                    )
+                    if new_roadmap:
+                        st.session_state.roadmap = new_roadmap
+                    
+                    more_in_queue = len(st.session_state.assessment_queue) > 0
+                    
+                    msg = f"Thanks for completing the assessment for {skill}. You scored {final_score}%."
+                    if final_score < 100:
+                        msg += f"\n\nTo achieve true mastery, you'll need to review the missing concepts in the roadmap."
+                    
+                    # Update UI
+                    response_msg = {
+                        "role": "assistant", 
+                        "content": msg,
+                        "assessment_result": {"skill": skill, "score": final_score}
+                    }
+                    
+                    if new_roadmap and not more_in_queue:
+                        response_msg["roadmap"] = new_roadmap
+                        
+                    st.session_state.messages.append(response_msg)
+                    
+                    # Check if there are more skills in the queue to assess
+                    if more_in_queue:
+                        next_skill = st.session_state.assessment_queue.pop(0)
+                        next_qs = st.session_state.adapter.run_assessment(next_skill)
+                        
+                        st.session_state.assessment_state = {
+                            "skill": next_skill,
+                            "questions": next_qs,
+                            "current_q_index": 0,
+                            "score_total": 0,
+                            "phase": "asking"
+                        }
+                        st.session_state.messages.append({"role": "assistant", "content": f"Next, let's check your readiness for {next_skill}."})
+                    else:
+                        # Clear assessment state
+                        st.session_state.assessment_state = None
+                        
                 st.session_state.processing = False
                 st.rerun()
 
@@ -190,7 +210,7 @@ if st.session_state.processing and not (st.session_state.assessment_state and st
             next_skill = st.session_state.assessment_queue.pop(0)
             
             # Generate assessment
-            question = st.session_state.adapter.run_assessment(next_skill)
+            questions = st.session_state.adapter.run_assessment(next_skill)
             
             if st.session_state.processing: # Still not cancelled
                 intro_msg = f"Before we finalize your roadmap, let's quickly check your readiness for {next_skill}."
@@ -198,7 +218,9 @@ if st.session_state.processing and not (st.session_state.assessment_state and st
                 
                 st.session_state.assessment_state = {
                     "skill": next_skill,
-                    "question": question,
+                    "questions": questions,
+                    "current_q_index": 0,
+                    "score_total": 0,
                     "phase": "asking"
                 }
         else:

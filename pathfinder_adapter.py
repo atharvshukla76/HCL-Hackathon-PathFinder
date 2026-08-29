@@ -123,13 +123,17 @@ class PathFinderAdapter:
                 return None, "Something went wrong while preparing your learning path. Please try again.", [], None
 
     def run_assessment(self, skill):
-        """Generates an assessment for a skill."""
+        """Generates 5 sequential assessments for a skill."""
         with contextlib.redirect_stdout(io.StringIO()):
             try:
-                question = self.llm_assistant.generate_assessment(skill)
-                return self._clean_llm_output(question)
+                questions_json = self.llm_assistant.generate_assessment(skill)
+                import json
+                questions = json.loads(questions_json)
+                if isinstance(questions, list) and len(questions) == 5:
+                    return questions
             except Exception:
-                return "Something went wrong generating the assessment. Please try again."
+                pass
+            return [f"Question {i+1} for {skill}: What is the primary function? A, B, C, D." for i in range(5)]
 
     def grade_answer(self, question, answer):
         """Grades an answer and returns the score (0-100)."""

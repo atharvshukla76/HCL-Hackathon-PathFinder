@@ -236,8 +236,8 @@ class RecommendationEngine:
                 reason = "Your next prerequisite."
                 readiness = user_profile.skill_readiness.get(skill, 100)
                 
-                if readiness < 80 and skill in user_profile.current_skills:
-                    reason = f"⚠️ REVISION REQUIRED (Readiness: {readiness}%). Review this fundamental concept."
+                if readiness < 100 and skill in user_profile.current_skills:
+                    reason = f"⚠️ REVISION REQUIRED (Readiness: {readiness}%). You must learn the missing portions of this skill to achieve full 5/5 mastery."
                 elif duration > 3.0:
                     
                     mock_chapter = self.llm_assistant.extract_video_chapters(best_resource['title'], skill, duration)
@@ -421,10 +421,16 @@ class ConversationalAIAssistant:
             
     def generate_assessment(self, skill):
         try:
-            prompt = f"Generate a single, moderately difficult multiple-choice assessment question to test conceptual knowledge of '{skill}'. Return ONLY the text of the question and options A, B, C, D."
-            response = self.client.chat.completions.create(model="qwen/qwen3.6-27b", messages=[{"role": "user", "content": prompt}], temperature=0.5, timeout=10.0)
-            return re.sub(r'<think>.*?</think>', '', response.choices[0].message.content, flags=re.DOTALL).strip()
-        except: return f"Question for {skill}: What is the primary function? A, B, C, D."
+            prompt = f"Generate 5 distinct, moderately difficult multiple-choice assessment questions to thoroughly test conceptual knowledge of '{skill}'. Return ONLY a valid JSON array of 5 strings. Each string must contain the question text and options A, B, C, D. Example: [\"Q1 text... A) B) C) D)\", \"Q2 text...\"]"
+            response = self.client.chat.completions.create(model="qwen/qwen3.6-27b", messages=[{"role": "user", "content": prompt}], temperature=0.5, timeout=15.0)
+            raw_text = re.sub(r'<think>.*?</think>', '', response.choices[0].message.content, flags=re.DOTALL).strip()
+            
+            # Extract JSON array
+            json_match = re.search(r'\[.*\]', raw_text, re.DOTALL)
+            if json_match:
+                return json_match.group(0).strip()
+            return raw_text
+        except: return f"[\"Question 1 for {skill}: What is the primary function? A, B, C, D.\", \"Question 2...\", \"Question 3...\", \"Question 4...\", \"Question 5...\"]"
         
     def grade_assessment(self, question, user_answer):
         try:
@@ -458,11 +464,11 @@ class AdaptiveProgressEngine:
             self.user_profile.assessment_history[norm] = []
         self.user_profile.assessment_history[norm].append(score)
         
-        
+        # Update readiness
         self.user_profile.skill_readiness[norm] = score
         
-        
-        if score >= 80:
+        # Mark as strictly mastered only if 100%
+        if score == 100:
             current_prof = self.user_profile.current_skills.get(norm, 0.0)
             self.user_profile.current_skills[norm] = min(1.0, current_prof + 0.2)
         
