@@ -336,11 +336,11 @@ class ConversationalAIAssistant:
             }}
             
             RULES:
-            1. If they say "I have no skills", "start from basics", or "zero experience", set "skills_assessed" to true and "known_skills" to {{}}.
+            1. If they say "I have no skills", "start from basics", "zero experience", OR if they mention knowing some skills but explicitly state they want to "learn from scratch" or have "weak foundations", set "skills_assessed" to true and "known_skills" to {{}}.
             2. If they explicitly state they JUST FINISHED a course or skill right now, set "completed_skill" to that skill name.
             3. OUTPUT ONLY RAW JSON. Do NOT output any conversational text, self-corrections, or markdown outside of the JSON object.
             """
-            response = self.client.chat.completions.create(model="qwen/qwen3.6-27b", messages=[{"role": "user", "content": prompt}], temperature=0.1, timeout=15.0)
+            response = self.client.chat.completions.create(model="qwen/qwen3.6-27b", messages=[{"role": "user", "content": prompt}], temperature=0.1, timeout=45.0)
             raw_text = re.sub(r'<think>.*?</think>', '', response.choices[0].message.content, flags=re.DOTALL).strip()
             
             
