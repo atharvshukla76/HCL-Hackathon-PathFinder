@@ -411,7 +411,10 @@ class ConversationalAIAssistant:
         try:
             prompt = f"The user is watching a {duration}-hour crash course titled '{video_title}'. They only need to learn '{skill}'. Generate a highly realistic, brief timeline showing the start and end time (e.g. 01:15:00 - 02:30:00) where this topic is most likely covered. Return ONLY the timestamp string."
             response = self.client.chat.completions.create(model="qwen/qwen3.6-27b", messages=[{"role": "user", "content": prompt}], temperature=0.5, timeout=5.0)
-            result = re.sub(r'<think>.*?</think>', '', response.choices[0].message.content, flags=re.DOTALL).strip()
+            raw_text = response.choices[0].message.content
+            if '<think>' in raw_text and '</think>' not in raw_text:
+                raise Exception("Cut off during thinking")
+            result = re.sub(r'<think>.*?</think>', '', raw_text, flags=re.DOTALL | re.IGNORECASE).strip()
             
             with self._cache_lock:
                 cache[cache_key] = result
@@ -421,9 +424,15 @@ class ConversationalAIAssistant:
             
     def generate_assessment(self, skill):
         try:
-            prompt = f"Generate 5 distinct, moderately difficult assessment questions to thoroughly test conceptual knowledge of '{skill}'. Include a mix of multiple-choice (with options A, B, C, D) and open-ended short-answer questions. Separate each of the 5 questions strictly using the exact string '|||'. Do NOT use JSON. Example: Question 1 text... A) B) C) D) ||| Question 2 short-answer text... ||| Question 3..."
+            prompt = f"Generate 5 distinct, moderately difficult assessment questions to thoroughly test conceptual knowledge of '{skill}'. Include a mix of multiple-choice (with options A, B, C, D) and open-ended short-answer questions. Separate each of the 5 questions strictly using the exact string '|||'. IMPORTANT: Do NOT output any <think> tags, thought process, or reasoning. Output ONLY the questions. Example: Question 1 text... A) B) C) D) ||| Question 2 short-answer text... ||| Question 3..."
             response = self.client.chat.completions.create(model="qwen/qwen3.6-27b", messages=[{"role": "user", "content": prompt}], temperature=0.5, timeout=15.0)
-            raw_text = re.sub(r'<think>.*?</think>', '', response.choices[0].message.content, flags=re.DOTALL).strip()
+            raw_text = response.choices[0].message.content
+            
+            # If the model output a thinking block but got cut off, trigger fallback
+            if '<think>' in raw_text and '</think>' not in raw_text:
+                raise Exception("Model cut off during <think> block")
+                
+            raw_text = re.sub(r'<think>.*?</think>', '', raw_text, flags=re.DOTALL | re.IGNORECASE).strip()
             return raw_text
         except: return f"What is a core concept of {skill}? ||| Explain how {skill} is used in practice. ||| What is a common pitfall when using {skill}? ||| Describe an advanced feature of {skill}. ||| How does {skill} integrate with other tools?"
         
