@@ -214,7 +214,7 @@ if st.session_state.processing and not (st.session_state.assessment_state and st
             questions = st.session_state.adapter.run_assessment(next_skill)
             
             if st.session_state.processing: # Still not cancelled
-                intro_msg = f"Before we finalize your roadmap, let's quickly check your readiness for {next_skill}."
+                intro_msg = f"Let's check your mastery of {next_skill} with a quick 5-question quiz!"
                 st.session_state.messages.append({"role": "assistant", "content": intro_msg})
                 
                 st.session_state.assessment_state = {
