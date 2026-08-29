@@ -17,7 +17,7 @@ This repository contains the core algorithmic engine, the Streamlit web applicat
 - **JSON Seed Files**: Act as the primary Knowledge Base (Layer 1) for career skills, aliases, and learning dependencies (e.g., `careers.json`, `prerequisites.json`).
 - **`requirements.txt`**: Contains the precise Python dependencies required to deploy the engine on Streamlit Cloud.
 
-## Key Features & Updates (V2.0)
+## Key Features & Updates 
 - **Interactive AI Skill Assessments**: Dynamically generates multi-format questions (MCQ vs Text) to accurately test the user's skill levels before building the roadmap.
 - **AI-Powered Grading & Feedback**: The LLM grades user answers out of 100. It acts as an interactive mentor, providing customized feedback for partial credit so users understand exactly why they got a question wrong.
 - **Conversational Intent Parsing**: The AI is context-aware. If a user says "I know Python but I want to learn from scratch," it intelligently ignores the known skills and drops them at the start of the roadmap.
