@@ -77,8 +77,12 @@ if st.session_state.assessment_state and st.session_state.assessment_state.get("
         st.markdown(f"**Readiness Check: {skill} (Question {q_index+1}/5)**")
         st.markdown(question)
         
+        import re
+        is_mcq = bool(re.search(r'(?i)\b[a-d][\)\.]', question))
+        input_label = "Select an option (A, B, C, or D)" if is_mcq else "Type your answer"
+        
         with st.form(key="assessment_form"):
-            answer = st.text_input("Your answer (e.g. A, B, C, D or text)")
+            answer = st.text_input(input_label)
             submit = st.form_submit_button("Submit")
             
             if submit:
