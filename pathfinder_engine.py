@@ -421,7 +421,7 @@ class ConversationalAIAssistant:
             
     def generate_assessment(self, skill):
         try:
-            prompt = f"Generate 5 distinct, moderately difficult multiple-choice assessment questions to thoroughly test conceptual knowledge of '{skill}'. Return ONLY a valid JSON array of 5 strings. Each string must contain the question text and options A, B, C, D. Example: [\"Q1 text... A) B) C) D)\", \"Q2 text...\"]"
+            prompt = f"Generate 5 distinct, moderately difficult assessment questions to thoroughly test conceptual knowledge of '{skill}'. Include a mix of multiple-choice (with options A, B, C, D) and open-ended short-answer questions. Return ONLY a valid JSON array of 5 strings. Each string must contain the question text (and options only if it is multiple-choice). Example: [\"Q1 text... A) B) C) D)\", \"Q2 short-answer text...\"]"
             response = self.client.chat.completions.create(model="qwen/qwen3.6-27b", messages=[{"role": "user", "content": prompt}], temperature=0.5, timeout=15.0)
             raw_text = re.sub(r'<think>.*?</think>', '', response.choices[0].message.content, flags=re.DOTALL).strip()
             
