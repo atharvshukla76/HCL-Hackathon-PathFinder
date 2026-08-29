@@ -13,7 +13,6 @@ def apply_custom_styles():
         }
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
-        header {visibility: hidden;}
         
         /* Chat bubble styling overrides */
         .stChatMessage {
