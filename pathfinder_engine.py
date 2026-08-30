@@ -305,7 +305,19 @@ class OpenDomainLLMCallback:
                 if not match: return {}
                 json_str = match.group(0).strip()
                 
-            llm_response = json.loads(json_str)
+            try:
+                llm_response = json.loads(json_str)
+            except Exception:
+                idx = json_str.rfind('}')
+                while idx > 0:
+                    try:
+                        llm_response = json.loads(json_str[:idx+1])
+                        break
+                    except:
+                        idx = json_str.rfind('}', 0, idx)
+                else:
+                    return {}
+            
             if not llm_response: return {}
             self.kb.dynamic_careers[career_name] = llm_response
             return llm_response
@@ -400,7 +412,13 @@ class ConversationalAIAssistant:
                         current_profile.current_skills[norm] = 0.5 
             
             val = data.get("skills_assessed")
-            if val is True or str(val).lower() == "true" or len(known_skills) > 0:
+            is_explicitly_assessed = (val is True or str(val).lower() == "true")
+            
+            if is_explicitly_assessed:
+                current_profile.skills_assessed = True
+                data["known_skills"] = {}
+                current_profile.current_skills = {}
+            elif len(known_skills) > 0:
                 current_profile.skills_assessed = True
                 
             has_career = (current_profile.target_career is not None and str(current_profile.target_career).strip() != "")
