@@ -170,5 +170,6 @@ class PathFinderAdapter:
                     roadmap = progress_engine.regenerate_roadmap(career_data)
                     return self._clean_roadmap(roadmap)
                 return []
-            except Exception:
+            except Exception as e:
+                with open("error_log.txt", "a") as f: f.write(f"Exception in record_assessment: {e}\n")
                 return []

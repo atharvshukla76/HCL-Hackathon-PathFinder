@@ -187,14 +187,19 @@ class SkillGapEngine:
         gaps = {}
         for skill, required_weight in career_skills.items():
             norm_skill = SkillNormalizer.canonicalize(skill)
+            
+            # Base proficiency from intent parsing (self-reported)
             current_proficiency = user_profile.current_skills.get(norm_skill, 0.0)
+            
+            # If they took an assessment, the readiness score is the strongest signal
+            if norm_skill in user_profile.skill_readiness:
+                assessed_prof = user_profile.skill_readiness[norm_skill] / 100.0
+                current_proficiency = max(current_proficiency, assessed_prof)
+                
             gap = required_weight - current_proficiency
-            readiness = user_profile.skill_readiness.get(norm_skill, 100)
 
             if gap > 0:
                 gaps[norm_skill] = gap
-            elif readiness < 80:
-                gaps[norm_skill] = 1.0 - (readiness / 100.0)
 
         return dict(sorted(gaps.items(), key=lambda item: item[1], reverse=True))
     
@@ -291,10 +296,17 @@ class OpenDomainLLMCallback:
         try:
             response = self.client.chat.completions.create(model="qwen/qwen3.6-27b", messages=[{"role": "user", "content": prompt}], temperature=0.1)
             raw_text = re.sub(r"<think>.*?</think>", "", response.choices[0].message.content or "", flags=re.DOTALL).strip()
-            match = re.search(r"\{.*\}", raw_text, flags=re.DOTALL)
-            if not match: return {}
-            llm_response = json.loads(match.group(0))
-            if not llm_response.get("skills"): return {}
+            
+            json_match = re.search(r'```json\s*(.*?)\s*```', raw_text, re.DOTALL)
+            if json_match:
+                json_str = json_match.group(1).strip()
+            else:
+                match = re.search(r"\{.*\}", raw_text, flags=re.DOTALL)
+                if not match: return {}
+                json_str = match.group(0).strip()
+                
+            llm_response = json.loads(json_str)
+            if not llm_response: return {}
             self.kb.dynamic_careers[career_name] = llm_response
             return llm_response
         except Exception: return {}
@@ -305,9 +317,13 @@ def resolve_career_requirements(career_name, engine, llm_callback):
         print("[Career Resolver] ✅ Requirements obtained from knowledge base.")
         return {"skills": reqs, "prerequisites": {}}
     reqs = llm_callback.fetch_career_skills(career_name)
-    if reqs and "skills" in reqs:
-        print("[Career Resolver] ✅ Requirements and dynamic prerequisites obtained from LLM.")
-        return reqs
+    if reqs:
+        if "skills" in reqs:
+            print("[Career Resolver] ✅ Requirements and dynamic prerequisites obtained from LLM.")
+            return reqs
+        elif isinstance(reqs, dict):
+            print("[Career Resolver] ✅ Requirements obtained from LLM (Flat Format).")
+            return {"skills": reqs, "prerequisites": {}}
     print(f"[Career Resolver] ❌ Unable to resolve requirements for {career_name}")
     return None
 
@@ -383,7 +399,8 @@ class ConversationalAIAssistant:
                     except ValueError:
                         current_profile.current_skills[norm] = 0.5 
             
-            if data.get("skills_assessed") is True or len(known_skills) > 0:
+            val = data.get("skills_assessed")
+            if val is True or str(val).lower() == "true" or len(known_skills) > 0:
                 current_profile.skills_assessed = True
                 
             has_career = (current_profile.target_career is not None and str(current_profile.target_career).strip() != "")
@@ -452,7 +469,26 @@ class ConversationalAIAssistant:
         try:
             roadmap_summary = [m['target_skill'] for m in new_roadmap] if new_roadmap else "No roadmap yet."
             prompt = f"""You are an AI Career Mentor. The user just said: "{user_input}"
-            RULES: If Target Career is None, ask what they want to become. If Skills Assessed is False, ask what they currently know. If Onboarding Complete is True, enthusiastically explain how their existing knowledge shaped this roadmap: {roadmap_summary}."""
+            
+            CURRENT SYSTEM STATE:
+            - Target Career Known: {bool(current_profile.target_career)}
+            - Skills Assessed: {current_profile.skills_assessed}
+            - Onboarding Complete: {current_profile.onboarding_complete}
+
+            INSTRUCTIONS based on state (Follow ONLY the first matching condition):
+            
+            Condition A: If Onboarding Complete is True:
+            - Acknowledge their career choice and current knowledge level.
+            - Enthusiastically introduce their personalized roadmap.
+            - Roadmap summary: {roadmap_summary}
+            - CRITICAL: DO NOT ask them any questions about their current skills or what they know. The assessment is already finished.
+            
+            Condition B: If Target Career Known is False:
+            - Ask what specific career they want to pursue.
+            
+            Condition C: If Skills Assessed is False:
+            - Ask them what skills they currently have related to their career.
+            """
             response = self.client.chat.completions.create(model="qwen/qwen3.6-27b", messages=[{"role": "user", "content": prompt}], temperature=0.7, timeout=10.0)
             return re.sub(r'<think>.*?</think>', '', response.choices[0].message.content, flags=re.DOTALL).strip()
         except: return "I've updated your roadmap! Check out the visualization panel."
@@ -481,8 +517,8 @@ class AdaptiveProgressEngine:
             self.user_profile.current_skills[norm] = min(1.0, current_prof + 0.2)
         
     def regenerate_roadmap(self, career_data):
-        career_skills = career_data.get("skills", {})
-        dynamic_prereqs = career_data.get("prerequisites", {})
+        career_skills = career_data.get("skills", {}) if isinstance(career_data, dict) and "skills" in career_data else career_data
+        dynamic_prereqs = career_data.get("prerequisites", {}) if isinstance(career_data, dict) and "prerequisites" in career_data else {}
         if dynamic_prereqs: self.skill_graph.build_graph(dynamic_prereqs)
         new_gaps = self.gap_engine.calculate_gaps(career_skills, self.user_profile)
         new_learning_path = resolve_learning_path(new_gaps, self.skill_graph)
