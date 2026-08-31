@@ -292,18 +292,19 @@ class OpenDomainLLMCallback:
             "skills": {{"Physics": 0.9, "Mathematics": 0.95}},
             "prerequisites": {{"Physics": ["Mathematics"]}}
         }}
+        
+        CRITICAL RULE: You MUST wrap your output in ```json ... ``` tags. DO NOT output any conversational text, reasoning, or brainstorming before or after the JSON.
         """
         try:
-            response = self.client.chat.completions.create(model="qwen/qwen3.6-27b", messages=[{"role": "user", "content": prompt}], temperature=0.1)
+            response = self.client.chat.completions.create(model="qwen/qwen3.6-27b", messages=[{"role": "user", "content": prompt}], temperature=0.1, max_tokens=4096)
             raw_text = re.sub(r"<think>.*?</think>", "", response.choices[0].message.content or "", flags=re.DOTALL).strip()
             
-            json_match = re.search(r'```json\s*(.*?)\s*```', raw_text, re.DOTALL)
-            if json_match:
-                json_str = json_match.group(1).strip()
+            json_matches = re.findall(r'```json\s*(.*?)\s*```', raw_text, re.DOTALL)
+            if json_matches:
+                json_str = json_matches[-1].strip()
             else:
-                match = re.search(r"\{.*\}", raw_text, flags=re.DOTALL)
-                if not match: return {}
-                json_str = match.group(0).strip()
+                # If no markdown block is used, assume the entire output is the JSON object
+                json_str = raw_text.strip()
                 
             try:
                 llm_response = json.loads(json_str)
